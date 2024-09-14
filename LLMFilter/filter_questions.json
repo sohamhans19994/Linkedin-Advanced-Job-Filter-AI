@@ -1,0 +1,11 @@
+[
+    ["Is the job in the AI or ML or a related field?",2],
+    ["Is the job in the software engineering field?",0.5],
+    ["Does the job need 3 or more years of AI/ML experience?",-0.5],
+    ["Does the job need 5 or more years of AI/ML experience?",-0.5],
+    ["Does the job need 7 or more years of AI/ML experience?",-1],
+    ["Is the company famous?",1],
+    ["Does the job require any specific security clearance?",-2],
+    ["Does the job strongly require a PhD?",-1],
+    ["Does the job have a preference for PhD but no strong necessity?",-0.5]
+]
