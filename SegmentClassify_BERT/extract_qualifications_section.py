@@ -12,7 +12,7 @@ class ExtractQualifications:
     def extract_qualifications(self,job_desc_html):
         data_sections = split_sections(job_desc_html)
         results = self.classifier(data_sections)
-        filtered_texts = [text for text, result in zip(data_sections, results) if result['label'] == "QUALIFICATIONS"]
+        filtered_texts = [text for text, result in zip(data_sections, results) if result['label'] == "True"]
         qualifications_text = " ".join(filtered_texts)
         return qualifications_text
 
