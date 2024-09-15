@@ -4,7 +4,6 @@ from linkedin_jobs_scraper.events import Events, EventData, EventMetrics
 from linkedin_jobs_scraper.query import Query, QueryOptions, QueryFilters
 from linkedin_jobs_scraper.filters import RelevanceFilters, TimeFilters, TypeFilters, ExperienceLevelFilters, \
     OnSiteOrRemoteFilters
-from chatgpt_selenium_automation.handler.chatgpt_selenium_automation import ChatGPTAutomation
 import pandas as pd
 import os
 import re
@@ -74,3 +73,9 @@ class Scrape:
         ]
 
         self.scraper.run(queries)
+    
+    def add_to_cloud(self):
+        pass
+
+    def get_from_cloud(self):
+        pass
