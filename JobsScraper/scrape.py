@@ -11,9 +11,16 @@ import threading
 import time
 from datetime import datetime
 from tqdm import tqdm
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from drive_utils import DriveUtils
 
 class Scrape:
-    def __init__(self,save_folder_path):
+    def __init__(self,save_folder_path,config):
         self.jobs_save_path = os.path.join(save_folder_path,"jobs.csv")
         self.logs_save_path = os.path.join(save_folder_path,"logs.txt")
         logging.basicConfig(
@@ -21,6 +28,9 @@ class Scrape:
             level=logging.INFO,  # Capture all messages of DEBUG level and above
             filemode='a'  # Append to the log file (use 'w' to overwrite)
         )
+        self.config = config
+        self.drive_utils = DriveUtils(config)
+        
     
     def linkedin_jobs(self):
         list_lock = threading.Lock()
@@ -73,9 +83,15 @@ class Scrape:
         ]
 
         self.scraper.run(queries)
-    
-    def add_to_cloud(self):
-        pass
 
-    def get_from_cloud(self):
-        pass
+    def add_to_cloud(self):
+        # folder_id = self.drive_utils.get_or_create_folder("Linkedin_scraped")
+        folder_id = self.config["GDRIVE_FOLDER_ID"]
+        cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
+        self.drive_utils.upload_file(self.jobs_save_path,cloud_save_name,folder_id)
+        print(f"Jobs csv added to cloud: {cloud_save_name}")
+
+    def get_from_cloud(self, local_save_path):
+        folder_id = self.config["GDRIVE_FOLDER_ID"]
+        cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
+        self.drive_utils.download_file(folder_id,cloud_save_name,local_save_path)
