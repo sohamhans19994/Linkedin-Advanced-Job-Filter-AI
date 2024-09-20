@@ -2,6 +2,8 @@ settings.yaml
 data/
 __pycache__/
 SegmentClassify_BERT/__pycache__/
-SegmentClassify_BERT/models/
+SegmentClassify_BERT/models
 LLMFilter/__pycache__/
 JobsScraper/__pycache__/
+gdrive/
+.vscode/

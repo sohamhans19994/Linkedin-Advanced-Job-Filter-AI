@@ -1,10 +1,10 @@
 from transformers import pipeline
-from utility import split_sections
+from .utility import split_sections
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
 class ExtractQualifications:
-    def __init__(self,model_path="models/finetuned_qualifications_classifier/"):
+    def __init__(self,model_path):
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
         self.classifier = pipeline('text-classification', model=self.model, tokenizer=self.tokenizer)

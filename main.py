@@ -1,6 +1,5 @@
 from JobsScraper.scrape import Scrape
 from SegmentClassify_BERT.extract_qualifications_section import ExtractQualifications
-from LLMFilter.job_filter import JobFilter
 import pandas as pd
 import os
 import json
@@ -22,7 +21,7 @@ def scrape(scraper, use_drive=False):
             shutil.rmtree(save_path)
             os.makedirs(save_path)
     else:
-        os.makedirs(save_path)
+        os.makedirs(save_path,exist_ok=True)
     
     scraper.linkedin_jobs()
     if use_drive:
@@ -32,6 +31,7 @@ def scrape(scraper, use_drive=False):
 
 
 def score(save_path,extractor,jobFilter):
+    from LLMFilter.job_filter import JobFilter
     with open('LLM_filter/filter_questions.json', 'r') as file:
         questions = json.load(file)
 
@@ -50,15 +50,16 @@ def score(save_path,extractor,jobFilter):
 
 
 def main(args):
-    qualifications_extractor = ExtractQualifications(config['BERT_MODEL_PATH'])
-    jobFilter = JobFilter(config['LLAMA_MODEL_PATH'])
     date = datetime.now().strftime('%Y-%m-%d')
     save_path = os.path.join(config["DATA_DIR"],date)
-    scraper = Scrape(save_path)
+    # os.environ['LI_AT_COOKIE'] = config["LI_AT_COOKIE"]
+    scraper = Scrape(save_path,config)
     if args.scrape:
         save_path = scrape(scraper, args.use_drive)
 
     if args.score:
+        qualifications_extractor = ExtractQualifications(config['BERT_MODEL_PATH'])
+        jobFilter = JobFilter(config['LLAMA_MODEL_PATH'])
         if args.use_drive:
             os.makedirs(os.path.basename(save_path), exist_ok=True)
             scraper.get_from_cloud(save_path)

@@ -17,22 +17,22 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from drive_utils import DriveUtils
+from .drive_utils import DriveUtils
 
 class Scrape:
     def __init__(self,save_folder_path,config):
         self.jobs_save_path = os.path.join(save_folder_path,"jobs.csv")
         self.logs_save_path = os.path.join(save_folder_path,"logs.txt")
-        logging.basicConfig(
-            filename=self.logs_save_path,  # Log messages to this file
-            level=logging.INFO,  # Capture all messages of DEBUG level and above
-            filemode='a'  # Append to the log file (use 'w' to overwrite)
-        )
         self.config = config
         self.drive_utils = DriveUtils(config)
         
     
     def linkedin_jobs(self):
+        logging.basicConfig(
+            filename=self.logs_save_path,  # Log messages to this file
+            level=logging.INFO,  # Capture all messages of DEBUG level and above
+            filemode='a'  # Append to the log file (use 'w' to overwrite)
+        )
         list_lock = threading.Lock()
         self.jobs_list = []
         self.just_saved = False
@@ -53,7 +53,7 @@ class Scrape:
             logging.info('[END]')
         
         self.scraper = LinkedinScraper(
-            chrome_executable_path='/usr/bin/chromedriver',
+            chrome_executable_path='/usr/local/bin/chromedriver',
             chrome_binary_location=None, 
             chrome_options=None, 
             headless=True,  
@@ -86,12 +86,20 @@ class Scrape:
 
     def add_to_cloud(self):
         # folder_id = self.drive_utils.get_or_create_folder("Linkedin_scraped")
-        folder_id = self.config["GDRIVE_FOLDER_ID"]
+        self.drive_utils.get_gdrive_service()
+        if ("GDRIVE_FOLDER_ID" in self.config):
+            folder_id = self.config["GDRIVE_FOLDER_ID"]
+        elif ("GDRIVE_FOLDER_NAME" in self.config):
+            folder_id = self.drive_utils.get_or_create_folder(self.config["GDRIVE_FOLDER_NAME"])
+        else:
+            folder_name = input("Please provide a gdrive folder name")
+            folder_id = self.drive_utils.get_or_create_folder(folder_name)
         cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
         self.drive_utils.upload_file(self.jobs_save_path,cloud_save_name,folder_id)
         print(f"Jobs csv added to cloud: {cloud_save_name}")
 
     def get_from_cloud(self, local_save_path):
+        self.drive_utils.get_gdrive_service()
         folder_id = self.config["GDRIVE_FOLDER_ID"]
         cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
         self.drive_utils.download_file(folder_id,cloud_save_name,local_save_path)
