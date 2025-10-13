@@ -22,11 +22,11 @@ class DriveUtils:
         if os.path.exists(self.config['GDRIVE_TOKEN_PATH']):
             creds = Credentials.from_authorized_user_file(self.config['GDRIVE_TOKEN_PATH'], self.gdrive_scope)
         if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(self.config['GDRIVE_API_CREDS_PATH'], self.gdrive_scope)
-                creds = flow.run_local_server(port=0)
+            # if creds and creds.expired and creds.refresh_token:
+            #     creds.refresh(Request())
+            # else:
+            flow = InstalledAppFlow.from_client_secrets_file(self.config['GDRIVE_API_CREDS_PATH'], self.gdrive_scope)
+            creds = flow.run_local_server(port=0)
             with open(self.config['GDRIVE_TOKEN_PATH'], "w") as token:
                 token.write(creds.to_json())
         self.service = build("drive", "v3", credentials=creds)
@@ -94,7 +94,7 @@ class DriveUtils:
         if file_id:
             request = self.service.files().get_media(fileId=file_id)
         
-            with open(destination_path, 'wb') as file:
+            with open(os.path.join(destination_path,"jobs.csv"), 'wb') as file:
                 downloader = MediaIoBaseDownload(file, request)
                 done = False
                 while done is False:

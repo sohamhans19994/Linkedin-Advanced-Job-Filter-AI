@@ -84,7 +84,7 @@ class Scrape:
 
         self.scraper.run(queries)
 
-    def add_to_cloud(self):
+    def add_to_cloud(self, local_path=None, cloud_save_name=None):
         # folder_id = self.drive_utils.get_or_create_folder("Linkedin_scraped")
         self.drive_utils.get_gdrive_service()
         if ("GDRIVE_FOLDER_ID" in self.config):
@@ -94,12 +94,22 @@ class Scrape:
         else:
             folder_name = input("Please provide a gdrive folder name")
             folder_id = self.drive_utils.get_or_create_folder(folder_name)
-        cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
-        self.drive_utils.upload_file(self.jobs_save_path,cloud_save_name,folder_id)
+        if not cloud_save_name:
+            cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
+        if not local_path:
+            self.drive_utils.upload_file(self.jobs_save_path,cloud_save_name,folder_id)
+        else:
+            self.drive_utils.upload_file(local_path,cloud_save_name,folder_id)
         print(f"Jobs csv added to cloud: {cloud_save_name}")
 
     def get_from_cloud(self, local_save_path):
         self.drive_utils.get_gdrive_service()
-        folder_id = self.config["GDRIVE_FOLDER_ID"]
+        if ("GDRIVE_FOLDER_ID" in self.config):
+            folder_id = self.config["GDRIVE_FOLDER_ID"]
+        elif ("GDRIVE_FOLDER_NAME" in self.config):
+            folder_id = self.drive_utils.get_or_create_folder(self.config["GDRIVE_FOLDER_NAME"])
+        else:
+            folder_name = input("Please provide a gdrive folder name")
+            folder_id = self.drive_utils.get_or_create_folder(folder_name)
         cloud_save_name = os.path.basename(os.path.dirname(self.jobs_save_path)) + "_jobs.csv"
         self.drive_utils.download_file(folder_id,cloud_save_name,local_save_path)
